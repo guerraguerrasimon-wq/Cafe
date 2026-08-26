@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kakao Wankó — Bean to Bar & Origen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Serif+JP:wght@300;400;600&family=Oswald:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #000;
+            --text: #fff;
+            --text-sec: rgba(255,255,255,0.65);
+            --text-ter: rgba(255,255,255,0.35);
+            --border: rgba(255,255,255,0.08);
+            --border-h: rgba(255,255,255,0.22);
+            
+            --silver: #e5e7eb;
+            --silver-dark: #9ca3af;
+            --vino-tinto: #6b1226;
+            --vino-glow: rgba(107, 18, 38, 0.45);
+            --silver-glow: rgba(229, 231, 235, 0.15);
+
+            --font: 'Inter', sans-serif;
+            --font-jp: 'Noto Serif JP', serif;
+            --font-d: 'Oswald', sans-serif;
+            --blur: blur(20px) saturate(180%);
+            --ease: cubic-bezier(0.4,0,0.2,1);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::selection { background: var(--vino-tinto); color: #fff; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 3px; }
+
+        /* ══════════════════════════════════════════
+           HEADER
+        ══════════════════════════════════════════ */
+        .header-initial {
+            position: fixed; top: 0; left: 0; width: 100%; height: 75px;
+            padding: 0 50px; display: flex; justify-content: space-between;
+            align-items: center; z-index: 1000;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent);
+            transition: all 0.4s var(--ease);
+        }
+        .header-initial.scrolled { opacity: 0; visibility: hidden; transform: translateY(-20px); }
+
+        .header-scroll {
+            position: fixed; top: 0; left: 0; width: 100%; height: 65px;
+            padding: 0 50px; display: flex; justify-content: space-between;
+            align-items: center; z-index: 999;
+            background: rgba(5, 5, 5, 0.85); backdrop-filter: var(--blur);
+            border-bottom: 1px solid var(--border);
+            transform: translateY(-100%);
+            transition: transform 0.5s var(--ease);
+        }
+        .header-scroll.visible { transform: translateY(0); }
+
+        .logo-container { position: relative; }
+        
+        .logo {
+            font-family: var(--font);
+            cursor: pointer;
+            display: flex; flex-direction: column;
+            align-items: flex-start; gap: 1px;
+            transition: opacity 0.3s var(--ease);
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+        .logo:hover { opacity: 0.8; }
+        .logo span:first-child { 
+            font-size: 15px; font-weight: 700; letter-spacing: 0.2em; 
+            text-transform: uppercase; color: var(--silver);
+        }
+        .logo span:last-child { 
+            font-size: 9px; letter-spacing: 0.4em; 
+            text-transform: uppercase; color: var(--silver-dark); 
+            font-family: var(--font-jp);
+        }
+
+        /* Dropdown con video */
+        .dropdown {
+            position: absolute; top: calc(100% + 18px); left: 0; width: 280px;
+            background: rgba(10, 10, 10, 0.98); border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden;
+            opacity: 0; visibility: hidden;
+            transform: translateY(-10px) scale(0.96);
+            transition: all 0.3s var(--ease);
+            backdrop-filter: blur(24px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+        }
+        .logo-container:hover .dropdown,
+        .logo-container.active .dropdown {
+            opacity: 1; visibility: visible; transform: translateY(0) scale(1);
+        }
+
+        .dropdown-video {
+            width: 100%; aspect-ratio: 16/9;
+            background: #000;
+            position: relative; overflow: hidden;
+            border-bottom: 1px solid var(--border);
+        }
+        .dropdown-video iframe { width: 100%; height: 100%; border: none; display: block; }
+        .dropdown-video-placeholder {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 8px;
+            background: #080808;
+        }
+        .dropdown-video-placeholder .logo-anim {
+            font-family: var(--font); font-size: 14px; font-weight: 700;
+            letter-spacing: 0.2em; text-transform: uppercase; color: var(--silver);
+        }
+        .dropdown-video-placeholder .logo-anim span {
+            display: block; font-size: 9px; font-weight: 400;
+            letter-spacing: 0.4em; color: var(--text-ter); margin-top: 4px;
+        }
+        .logo-pulse {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 6px;
+            animation: logoPulse 2s ease-in-out infinite;
+        }
+        .logo-pulse i { font-size: 12px; color: var(--silver); }
+        @keyframes logoPulse {
+            0%, 100% { border-color: rgba(255,255,255,0.1); transform: scale(1); }
+            50% { border-color: var(--vino-tinto); transform: scale(1.08); }
+        }
+
+        .dropdown-links { padding: 14px; display: flex; flex-direction: column; gap: 2px; }
+        .dropdown-links a {
+            color: var(--text-sec); text-decoration: none; font-size: 12px;
+            padding: 10px 12px; border-radius: 8px; transition: all 0.2s;
+            position: relative; overflow: hidden; display: flex; align-items: center; gap: 10px;
+        }
+        .dropdown-links a::before {
+            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 2px;
+            background: var(--silver); transform: scaleY(0); transition: transform 0.2s;
+        }
+        .dropdown-links a:hover { color: #fff; background: rgba(255,255,255,0.04); padding-left: 16px; }
+        .dropdown-links a:hover::before { transform: scaleY(1); }
+        .dropdown-links a i { font-size: 11px; opacity: 0.6; width: 14px; text-align: center; }
+
+        .nav-center { display: flex; align-items: center; }
+        .nav-links-container {
+            background: rgba(255,255,255,0.02); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 100px; padding: 6px 24px;
+            transition: all 0.4s var(--ease);
+        }
+        .nav-links-container:hover { background: rgba(255,255,255,0.05); border-color: var(--border-h); }
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a {
+            font-size: 11px; font-weight: 500; color: var(--text-sec);
+            text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase;
+            padding: 6px 0; position: relative; transition: color 0.3s;
+        }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px;
+            background: var(--silver); transition: width 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active { color: #fff; }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+
+        .search-container {
+            display: flex; align-items: center;
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+            border-radius: 100px; padding: 5px 5px 5px 16px;
+            transition: all 0.5s var(--ease); width: 140px;
+        }
+        .search-container:focus-within { width: 210px; background: rgba(255,255,255,0.06); border-color: var(--border-h); }
+        .search-bar { width: 70px; background: transparent; border: none; color: #fff; font-size: 12px; outline: none; transition: width 0.4s; }
+        .search-bar::placeholder { color: var(--text-ter); }
+        .search-container:focus-within .search-bar { width: 140px; }
+        .search-btn {
+            width: 30px; height: 30px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border); border-radius: 50%;
+            color: var(--text-sec); cursor: pointer; margin-left: 6px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s var(--ease);
+        }
+        .search-btn:hover { background: rgba(255,255,255,0.15); color: #fff; transform: scale(1.08); }
+
+        /* ══════════════════════════════════════════
+           HERO
+        ══════════════════════════════════════════ */
+        .page-hero {
+            height: 70vh; min-height: 480px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; position: relative;
+            overflow: hidden; padding: 0 20px;
+        }
+        .page-hero::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 50% 70%, var(--vino-glow) 0%, transparent 70%);
+        }
+        .hero-bg-text {
+            position: absolute; font-family: var(--font-jp);
+            font-size: clamp(160px, 25vw, 300px); font-weight: 600;
+            line-height: 1; color: rgba(255,255,255,0.015);
+            user-select: none; pointer-events: none;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            white-space: nowrap;
+        }
+        .page-hero-kanji {
+            font-family: var(--font-jp); font-size: 13px; font-weight: 300;
+            color: var(--silver-dark); letter-spacing: 0.5em; margin-bottom: 16px;
+            opacity: 0; animation: fadeUp 0.7s ease 0.2s forwards;
+        }
+        .page-hero-title {
+            font-family: var(--font); font-size: clamp(48px, 8vw, 90px);
+            font-weight: 800; letter-spacing: -0.03em; line-height: 0.95;
+            background: linear-gradient(180deg, #ffffff 0%, var(--silver-dark) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            margin-bottom: 20px;
+            opacity: 0; animation: fadeUp 0.8s ease 0.4s forwards;
+        }
+        .page-hero-sub {
+            font-family: var(--font-d); font-size: 12px; font-weight: 300;
+            color: var(--text-sec); letter-spacing: 0.3em; text-transform: uppercase;
+            max-width: 600px; opacity: 0; animation: fadeUp 0.7s ease 0.6s forwards;
+        }
+        .hero-line {
+            width: 1px; height: 50px;
+            background: linear-gradient(to bottom, var(--silver-dark), transparent);
+            margin: 36px auto 0;
+            opacity: 0; animation: fadeUp 0.7s ease 0.8s forwards;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ══════════════════════════════════════════
+           STORIES (Textos centrados y Fotografía Real)
+        ══════════════════════════════════════════ */
+        .sponsors-wrap { position: relative; }
+
+        .sponsor-scene {
+            position: relative; min-height: 100vh;
+            display: grid; grid-template-rows: 1fr;
+            overflow: hidden; border-top: 1px solid var(--border);
+        }
+
+        .scene-number {
+            position: absolute; font-family: var(--font-d); font-weight: 900;
+            font-size: clamp(240px, 35vw, 450px);
+            line-height: 0.8; letter-spacing: -0.06em;
+            color: rgba(255,255,255,0.02);
+            pointer-events: none; user-select: none;
+            right: -2%; bottom: -5%;
+            transition: transform 0.6s var(--ease);
+        }
+        .sponsor-scene:hover .scene-number { transform: scale(1.03) translateY(-8px); }
+
+        .scene-glow {
+            position: absolute; inset: 0; pointer-events: none;
+            opacity: 0; transition: opacity 0.6s;
+        }
+        .sponsor-scene:hover .scene-glow { opacity: 1; }
+
+        .scene-inner {
+            display: grid; grid-template-columns: 1fr 1px 1.1fr;
+            min-height: 100vh; position: relative; z-index: 2;
+        }
+
+        /* LEFT — Historia Centrada */
+        .scene-left {
+            padding: 120px 60px 80px;
+            display: flex; flex-direction: column;
+            justify-content: space-between; align-items: center;
+            text-align: center;
+        }
+        .scene-index {
+            font-family: var(--font-jp); font-size: 11px; font-weight: 400;
+            letter-spacing: 0.3em; color: var(--text-ter); text-transform: uppercase;
+            display: flex; align-items: center; justify-content: center; gap: 16px;
+        }
+        
+        .scene-name-wrap { 
+            margin-top: 40px; 
+            display: flex; flex-direction: column; align-items: center; 
+        }
+        .scene-name {
+            font-family: var(--font); font-size: clamp(46px, 5.5vw, 76px);
+            font-weight: 800; letter-spacing: -0.03em; line-height: 1;
+            display: block; margin-bottom: 10px; text-align: center;
+        }
+        .scene-name-jp {
+            font-family: var(--font-jp); font-size: 13px; font-weight: 300;
+            color: var(--silver-dark); letter-spacing: 0.25em; text-align: center;
+        }
+        .scene-tagline {
+            margin: 32px auto 0; font-size: 14px; font-weight: 300;
+            color: var(--text-sec); line-height: 1.85; max-width: 440px;
+            text-align: center;
+        }
+
+        .scene-status {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 18px;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            border-radius: 100px; font-size: 11px; font-weight: 500;
+            color: var(--silver); letter-spacing: 0.05em; margin: 0 auto;
+        }
+        .status-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: var(--silver);
+            animation: blink 2.5s ease-in-out infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+        /* DIVIDER vertical */
+        .scene-divider { background: var(--border); position: relative; }
+        .scene-divider::after {
+            content: ''; position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 1px; height: 80px;
+            background: linear-gradient(to bottom, transparent, var(--silver-dark), transparent);
+        }
+
+        /* RIGHT — Fotografía Real Integrada */
+        .scene-right {
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .scene-img-real {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%; object-fit: cover;
+            filter: brightness(0.65) contrast(1.1);
+            transition: transform 0.8s var(--ease), filter 0.8s var(--ease);
+        }
+        .sponsor-scene:hover .scene-img-real {
+            transform: scale(1.05);
+            filter: brightness(0.75) contrast(1.15);
+        }
+        .scene-img-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.4) 100%);
+            z-index: 1;
+        }
+
+        .scene-visual-content {
+            position: relative; z-index: 2; padding: 60px;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            height: 100%; width: 100%;
+        }
+
+        .scene-stats {
+            display: flex; flex-direction: column; gap: 22px;
+            margin-top: auto; padding-top: 40px;
+        }
+        .scene-stat {
+            border-left: 2px solid var(--border-h);
+            padding-left: 16px;
+            opacity: 0; transform: translateX(20px);
+            transition: all 0.5s var(--ease);
+        }
+        .sponsor-scene:hover .scene-stat { opacity: 1; transform: translateX(0); }
+        .sponsor-scene:hover .scene-stat:nth-child(2) { transition-delay: 0.08s; }
+
+        .scene-stat-label {
+            font-family: var(--font-jp); font-size: 10px; color: var(--text-ter);
+            letter-spacing: 0.2em; margin-bottom: 4px; text-transform: uppercase;
+        }
+        .scene-stat-val {
+            font-size: 13px; font-weight: 400; color: var(--silver);
+            letter-spacing: 0.03em; line-height: 1.4;
+        }
+
+        /* Estilos por Sección */
+        .scene-origen .scene-name {
+            background: linear-gradient(135deg, #ffffff 40%, #a82e46 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .scene-origen .scene-glow {
+            background: radial-gradient(ellipse at 80% 50%, var(--vino-glow) 0%, transparent 60%);
+        }
+        .scene-origen .scene-stat { border-color: rgba(168, 46, 70, 0.6); }
+
+        .scene-process .scene-name {
+            background: linear-gradient(135deg, #ffffff 30%, var(--silver-dark) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .scene-process .scene-glow {
+            background: radial-gradient(ellipse at 20% 50%, var(--silver-glow) 0%, transparent 60%);
+        }
+        .scene-process .scene-stat { border-color: var(--border-h); }
+
+        .scene-alquimia .scene-name {
+            background: linear-gradient(135deg, var(--silver) 20%, #7f1d1d 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .scene-alquimia .scene-glow {
+            background: radial-gradient(ellipse at 80% 50%, rgba(127, 29, 29, 0.35) 0%, transparent 60%);
+        }
+        .scene-alquimia .scene-stat { border-color: rgba(127, 29, 29, 0.6); }
+
+        /* Mouse spotlight */
+        .scene-spotlight {
+            position: absolute; inset: 0; z-index: 1; pointer-events: none;
+            background: radial-gradient(400px circle at var(--mx,50%) var(--my,50%),
+                rgba(255,255,255,0.03), transparent 50%);
+            opacity: 0; transition: opacity 0.4s;
+        }
+        .sponsor-scene:hover .scene-spotlight { opacity: 1; }
+
+        .sponsor-scene {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+        }
+        .sponsor-scene.revealed { opacity: 1; transform: translateY(0); }
+
+        /* FOOTER */
+        .footer {
+            background: #000; padding: 60px 50px;
+            border-top: 1px solid var(--border);
+        }
+        .footer-bottom {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 16px; max-width: 1200px; margin: 0 auto;
+        }
+        .footer-copyright { font-size: 12px; color: var(--text-ter); }
+        .footer-signature { font-family: var(--font-jp); font-size: 11px; color: var(--text-ter); letter-spacing: 0.15em; }
+
+        @media (max-width: 1024px) {
+            .scene-inner { grid-template-columns: 1fr; grid-template-rows: auto 1px 45vh; }
+            .scene-divider { width: 100%; height: 1px; }
+            .scene-left { padding: 80px 30px 50px; }
+            .scene-number { font-size: 180px; right: -5%; bottom: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ══ HEADER INICIAL ══ -->
+    <header class="header-initial" id="headerInitial">
+        <div class="logo-container" id="lc1">
+            <div class="logo" onclick="toggleDD('lc1')">
+                <span>KAKAO WANKÓ</span>
+                <span>カカオワンコ</span>
+            </div>
+            <div class="dropdown">
+                <div class="dropdown-video">
+                    <iframe id="logoVideo1" src="https://drive.google.com/file/d/TU_ID_AQUI/preview" allow="autoplay" allowfullscreen></iframe>
+                    <div class="dropdown-video-placeholder" id="dvp1">
+                        <div class="logo-pulse"><i class="fas fa-play"></i></div>
+                        <div class="logo-anim">KAKAO WANKÓ<span>カカオワンコ</span></div>
+                    </div>
+                </div>
+                <div class="dropdown-links">
+                    <a href="#origen"><i class="fas fa-seedling"></i>El Origen</a>
+                    <a href="#proceso"><i class="fas fa-mortar-pestle"></i>Proceso Bean to Bar</a>
+                    <a href="#alquimia"><i class="fas fa-gem"></i>La Alquimia</a>
+                </div>
+            </div>
+        </div>
+        <nav class="nav-center">
+            <div class="nav-links-container">
+                <div class="nav-links">
+                    <a href="#origen" class="active">Origen</a>
+                    <a href="#proceso">Bean to Bar</a>
+                    <a href="#alquimia">Alquimia</a>
+                </div>
+            </div>
+        </nav>
+        <div class="search-container">
+            <input type="text" class="search-bar" placeholder="Buscar..." autocomplete="off">
+            <button class="search-btn"><i class="fas fa-search"></i></button>
+        </div>
+    </header>
+
+    <!-- ══ HEADER SCROLL ══ -->
+    <header class="header-scroll" id="headerScroll">
+        <div class="logo-container" id="lc2">
+            <div class="logo" onclick="toggleDD('lc2')">
+                <span>KAKAO WANKÓ</span>
+                <span>カカオワンコ</span>
+            </div>
+            <div class="dropdown">
+                <div class="dropdown-video">
+                    <iframe id="logoVideo2" src="https://drive.google.com/file/d/TU_ID_AQUI/preview" allow="autoplay" allowfullscreen></iframe>
+                    <div class="dropdown-video-placeholder" id="dvp2">
+                        <div class="logo-pulse"><i class="fas fa-play"></i></div>
+                        <div class="logo-anim">KAKAO WANKÓ<span>カカオワンコ</span></div>
+                    </div>
+                </div>
+                <div class="dropdown-links">
+                    <a href="#origen"><i class="fas fa-seedling"></i>El Origen</a>
+                    <a href="#proceso"><i class="fas fa-mortar-pestle"></i>Proceso Bean to Bar</a>
+                    <a href="#alquimia"><i class="fas fa-gem"></i>La Alquimia</a>
+                </div>
+            </div>
+        </div>
+        <nav class="nav-center">
+            <div class="nav-links-container">
+                <div class="nav-links">
+                    <a href="#origen" class="active">Origen</a>
+                    <a href="#proceso">Bean to Bar</a>
+                    <a href="#alquimia">Alquimia</a>
+                </div>
+            </div>
+        </nav>
+        <div class="search-container">
+            <input type="text" class="search-bar" placeholder="Buscar..." autocomplete="off">
+            <button class="search-btn"><i class="fas fa-search"></i></button>
+        </div>
+    </header>
+
+    <!-- ══ HERO ══ -->
+    <section class="page-hero">
+        <div class="hero-bg-text">純粋</div>
+        <div class="page-hero-kanji">純粋 · PUREZA & TRADICIÓN</div>
+        <h1 class="page-hero-title">Kakao Wankó</h1>
+        <p class="page-hero-sub">El arte ancestral del cacao · De la semilla a la barra</p>
+        <div class="hero-line"></div>
+    </section>
+
+    <!-- ══ SECCIONES NARRATIVAS (Textos centrados sin botones) ══ -->
+    <div class="sponsors-wrap">
+
+        <!-- ── 01 EL ORIGEN ── -->
+        <section class="sponsor-scene scene-origen revealed" id="origen">
+            <div class="scene-spotlight"></div>
+            <div class="scene-glow"></div>
+            <div class="scene-number">01</div>
+            <div class="scene-inner">
+                <div class="scene-left">
+                    <div>
+                        <div class="scene-index">01 &nbsp;·&nbsp; Historia</div>
+                        <div class="scene-name-wrap">
+                            <span class="scene-name">El Origen</span>
+                            <div class="scene-name-jp">起源 · Terruño Sagrado</div>
+                        </div>
+                        <p class="scene-tagline">
+                            Nuestra travesía comienza en micro-fundos seleccionados a mano. Cultivamos variedades criollas puras bajo sombra natural, respetando los ciclos lunares y la biodiversidad del ecosistema originario.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="scene-status">
+                            <span class="status-dot"></span>
+                            Cosecha de Altura
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scene-divider"></div>
+
+                <div class="scene-right">
+                    <img class="scene-img-real" src="https://i.pinimg.com/1200x/be/7a/3e/be7a3e00ae4226e662bed57cc3c57a61.jpg" alt="Mazorcas de cacao nativo abiertas">
+                    <div class="scene-img-overlay"></div>
+                    <div class="scene-visual-content">
+                        <div class="scene-stats">
+                            <div class="scene-stat">
+                                <div class="scene-stat-label">variedad</div>
+                                <div class="scene-stat-val">Cacao Criollo Nativo 100% Porcelana</div>
+                            </div>
+                            <div class="scene-stat">
+                                <div class="scene-stat-label">terruño</div>
+                                <div class="scene-stat-val">Suelos volcánicos enriquecidos</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── 02 PROCESO BEAN TO BAR ── -->
+        <section class="sponsor-scene scene-process revealed" id="proceso">
+            <div class="scene-spotlight"></div>
+            <div class="scene-glow"></div>
+            <div class="scene-number">02</div>
+            <div class="scene-inner">
+                <div class="scene-left">
+                    <div>
+                        <div class="scene-index">02 &nbsp;·&nbsp; Artesanía</div>
+                        <div class="scene-name-wrap">
+                            <span class="scene-name">Bean to Bar</span>
+                            <div class="scene-name-jp">工程 · Tueste & Molido Lento</div>
+                        </div>
+                        <p class="scene-tagline">
+                            Rechazamos la producción industrial. Fermentamos en cajones de madera de manteco durante 6 días y aplicamos un tueste suave con aire controlado para preservar los aceites esenciales y notas florales.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="scene-status">
+                            <span class="status-dot"></span>
+                            Molido en Piedra de Granito
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scene-divider"></div>
+
+                <div class="scene-right">
+                    <img class="scene-img-real" src="https://images.unsplash.com/photo-1606312619070-d48b4c652a52?auto=format&fit=crop&w=1200&q=80" alt="Grano de Cacao Bean to Bar">
+                    <div class="scene-img-overlay"></div>
+                    <div class="scene-visual-content">
+                        <div class="scene-stats">
+                            <div class="scene-stat">
+                                <div class="scene-stat-label">conchado</div>
+                                <div class="scene-stat-val">72 Horas continuas en granito</div>
+                            </div>
+                            <div class="scene-stat">
+                                <div class="scene-stat-label">ingredientes</div>
+                                <div class="scene-stat-val">Solo Habas de Cacao y Azúcar Orgánica</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── 03 LA ALQUIMIA ── -->
+        <section class="sponsor-scene scene-alquimia revealed" id="alquimia">
+            <div class="scene-spotlight"></div>
+            <div class="scene-glow"></div>
+            <div class="scene-number">03</div>
+            <div class="scene-inner">
+                <div class="scene-left">
+                    <div>
+                        <div class="scene-index">03 &nbsp;·&nbsp; La Experiencia</div>
+                        <div class="scene-name-wrap">
+                            <span class="scene-name">La Alquimia</span>
+                            <div class="scene-name-jp">儀式 · Perfil de Cata</div>
+                        </div>
+                        <p class="scene-tagline">
+                            Cada corte revela la complejidad de la tierra. Textura sedosa, acidez frutal equilibrada y un prolongado retrogusto a frutos secos y madera noble. Sin aditivos, lecitinas ni grasas añadidas.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="scene-status">
+                            <span class="status-dot"></span>
+                            Cacao Puro de Edición Limitada
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scene-divider"></div>
+
+                <div class="scene-right">
+                    <img class="scene-img-real" src="https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&w=1200&q=80" alt="Barra de Cacao Artesanal Alquimia">
+                    <div class="scene-img-overlay"></div>
+                    <div class="scene-visual-content">
+                        <div class="scene-stats">
+                            <div class="scene-stat">
+                                <div class="scene-stat-label">pureza</div>
+                                <div class="scene-stat-val">85% Cacao Puro de Finca</div>
+                            </div>
+                            <div class="scene-stat">
+                                <div class="scene-stat-label">perfil</div>
+                                <div class="scene-stat-val">Notas a ciruela pasa, jazmín y maderas nobles</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- ══ FOOTER ══ -->
+    <footer class="footer">
+        <div class="footer-bottom">
+            <div class="footer-copyright">
+                &copy; Kakao Wankó — Todos los derechos reservados. El arte del cacao puro.
+            </div>
+            <div class="footer-signature">
+                匠人精神 · CRAFTSMANSHIP
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Efecto Header Scroll
+        window.addEventListener('scroll', () => {
+            const initial = document.getElementById('headerInitial');
+            const scrollHeader = document.getElementById('headerScroll');
+            if (window.scrollY > 100) {
+                initial.classList.add('scrolled');
+                scrollHeader.classList.add('visible');
+            } else {
+                initial.classList.remove('scrolled');
+                scrollHeader.classList.remove('visible');
+            }
+        });
+
+        // Spotlight Mouse Effect
+        document.querySelectorAll('.sponsor-scene').forEach(scene => {
+            scene.addEventListener('mousemove', e => {
+                const rect = scene.getBoundingClientRect();
+                scene.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+                scene.style.setProperty('--my', `${e.clientY - rect.top}px`);
+            });
+        });
+
+        // Dropdown Toggle Script
+        function toggleDD(id) {
+            const container = document.getElementById(id);
+            container.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
